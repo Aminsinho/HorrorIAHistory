@@ -1,9 +1,9 @@
 package com.aminsinho.repository;
 
-import com.aminsinho.models.Usuario;
+import com.aminsinho.models.Question;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+public interface QuestionRepository extends JpaRepository<Question, Long> {
 }

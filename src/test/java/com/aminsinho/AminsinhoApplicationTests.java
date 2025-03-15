@@ -1,4 +1,4 @@
-package com.aminsinho.aminsinho;
+package com.aminsinho;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
