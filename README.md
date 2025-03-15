@@ -24,3 +24,75 @@ To change the database creation mode, modify the `application.properties` file i
 
 ```properties
 spring.jpa.hibernate.ddl-auto=update
+````
+
+### Project Structure
+
+The project structure is as follows:
+
+- `src/main/java`: Contains the Java source code for the application.
+- `src/main/resources`: Contains the application properties and configuration files.
+- `src/test/java`: Contains the test source code for the application.
+- `src/test/resources`: Contains the test properties and configuration files.
+- `build.gradle`: Contains the Gradle build script for the application.
+- `Dockerfile`: Contains the Dockerfile for building the application image.
+- `docker-compose.yml`: Contains the Docker Compose configuration for running the application and its dependencies.
+- `README.md`: Contains information about the project and how to start the application.
+
+
+
+### Running Tests
+
+To run the tests for the application, use the following command:
+
+```bash 
+./gradlew test
+````
+
+### Running the Application
+
+To run the application using Docker Compose, follow these steps:
+
+1. **Build the Docker images**: Run `docker-compose build` to build the Docker images.
+2. **Start the application**: Use Docker Compose to start the application and its dependencies by running `docker-compose up`.
+3. **Access the application**: The application will be available at `http://localhost:8080`.
+
+### Accessing the Database
+
+To access the PostgreSQL database, use the following credentials:
+
+
+- **Host**: `localhost`
+- **Port**: `5432`
+- **Database Name**: `mydatabase`
+- **Username **: `user`
+- **Password**: `admin`
+
+You can use a database client such as `pgAdmin` or `DBeaver` to connect to the database using these credentials.
+
+
+### To create a user, use the following endpoint:
+
+- **URL**: `http://localhost:8080/users/register` 
+- **Method**: `POST`
+- **Request Body Example**:
+
+````json
+'{"username": "testuser", "password": "testpassword"}'
+````
+
+### To authenticate a user, use the following endpoint:
+- **URL**: `http://localhost:8080/token`
+- **Method**: `POST`
+- **Request Body Example**:
+
+````json
+'{"username": "testuser", "password": "testpassword"}'
+````
+
+### To access a protected endpoint, use the following endpoint:
+
+- **URL**: `http://localhost:8080/hello`
+- **Method**: `GET`
+- **Headers**: `Authorization: Bearer <token>`
+
