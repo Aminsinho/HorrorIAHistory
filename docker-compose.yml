@@ -13,7 +13,8 @@ services:
       - backend
 
   app:
-    build: .
+    build:
+      context: .  # Apunta a la raíz del proyecto (donde está el backend)
     depends_on:
       - db
     environment:
@@ -25,6 +26,16 @@ services:
     networks:
       - backend
     command: /wait-for-it.sh db:5432 -- ./gradlew bootRun --no-daemon
+
+  frontend:
+    build:
+      context: ./react-frontend  # Apunta a la carpeta de React
+    ports:
+      - "3000:3000"
+    networks:
+      - backend
+    depends_on:
+      - app  # El frontend depende del backend
 
 networks:
   backend:
