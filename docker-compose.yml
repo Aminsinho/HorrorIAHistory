@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # Servicio para la base de datos PostgreSQL
   db:
     image: postgres:latest
     environment:
@@ -12,9 +13,9 @@ services:
     networks:
       - backend
 
+  # Servicio para el backend en Spring Boot
   app:
-    build:
-      context: .  # Apunta a la raíz del proyecto (donde está el backend)
+    build: ./  # Esto indica que el backend está en la raíz del proyecto
     depends_on:
       - db
     environment:
@@ -27,15 +28,15 @@ services:
       - backend
     command: /wait-for-it.sh db:5432 -- ./gradlew bootRun --no-daemon
 
+  # Servicio para el frontend en React
   frontend:
-    build:
-      context: ./react-frontend  # Apunta a la carpeta de React
+    build: ./react-frontend  # Carpeta donde está tu aplicación React
     ports:
-      - "3000:3000"
+      - "3000:3000"  # Exponer el puerto 3000 del frontend
+    depends_on:
+      - app
     networks:
       - backend
-    depends_on:
-      - app  # El frontend depende del backend
 
 networks:
   backend:

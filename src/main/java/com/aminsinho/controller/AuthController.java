@@ -27,6 +27,7 @@ public class AuthController {
 
     private final String SECRET_KEY = "secret";
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/token")
     public Map<String, String> generateToken(@RequestBody User user) throws AuthenticationException {
         Authentication authentication = authenticationManager.authenticate(

@@ -1,77 +1,135 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import './App.css';
 
-// Función para simular el efecto de escribir en la terminal
-const typeWriter = (text, setText, speed = 50) => {
-  let i = 0;
-  const interval = setInterval(() => {
-    setText((prev) => prev + text[i]);
-    i++;
-    if (i === text.length) {
-      clearInterval(interval);
-    }
-  }, speed);
-};
-
 function App() {
-  const [command, setCommand] = useState('');
-  const [output, setOutput] = useState('');
+  const [input, setInput] = useState("");
+  const [output, setOutput] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [partialResponse, setPartialResponse] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [token, setToken] = useState(null);
 
+  // Verificar si ya hay un token guardado
   useEffect(() => {
-    // Aquí puedes simular un mensaje inicial o una bienvenida
-    typeWriter('Welcome to the Interactive Command Line!', setOutput, 100);
+    const savedToken = localStorage.getItem("jwtToken");
+    if (savedToken) {
+      setToken(savedToken);
+      setIsLoggedIn(true);
+    }
   }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!command.trim()) return;
+  // Enviar comando a la API de Ollama
+  const sendCommandToOllama = async (command) => {
+    if (!token) {
+      setOutput((prevOutput) => [
+        ...prevOutput,
+        <div key={prevOutput.length} className="error">
+          You need to log in first.
+        </div>,
+      ]);
+      return;
+    }
 
     setLoading(true);
-    setOutput((prev) => prev + '\n' + '> ' + command); // Muestra el comando que el usuario escribió
-
-    // Aquí es donde realizamos la llamada a la API de Ollama
+    setPartialResponse("");
     try {
-      const response = await fetch('https://api.ollama.com/v1/generate', {
-        method: 'POST',
+      const response = await fetch("http://localhost:11434/api/generate", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer YOUR_API_KEY`,  // Reemplaza con tu clave de API
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`, // Agregar el token JWT a la cabecera
         },
         body: JSON.stringify({
-          prompt: command,  // El comando del usuario es el prompt que le pasamos a la API
-          model: 'mistral', // O cualquier otro modelo que quieras usar
+          model: "mistral",
+          prompt: command,
         }),
       });
 
-      const data = await response.json();
-      const apiResponse = data?.response || 'No response from API';
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let done = false;
+      let fullResponse = "";
 
-      // Mostrar la respuesta de la API en la terminal
-      typeWriter('\n' + apiResponse, setOutput, 50);
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        const chunk = decoder.decode(value, { stream: true });
+        const jsonChunks = chunk.split("\n").filter(Boolean).map(JSON.parse);
+
+        jsonChunks.forEach((jsonChunk) => {
+          fullResponse += jsonChunk.response;
+        });
+      }
+
+      // Simular efecto de escritura
+      simulateTyping(fullResponse, command);
     } catch (error) {
-      typeWriter('\nError: ' + error.message, setOutput, 50);
+      setOutput((prevOutput) => [
+        ...prevOutput,
+        <div key={prevOutput.length} className="command">{`> ${command}`}</div>,
+        <div key={prevOutput.length + 1} className="error">{`Error al interactuar con Ollama: ${error.message}`}</div>
+      ]);
     }
-
     setLoading(false);
-    setCommand('');
+  };
+
+  // Función para simular la escritura del texto
+  const simulateTyping = (fullResponse, command) => {
+    let index = 0;
+    setPartialResponse(""); // Limpiar la respuesta parcial anterior
+
+    const typingInterval = setInterval(() => {
+      setPartialResponse((prev) => prev + fullResponse[index]);
+      index++;
+
+      if (index === fullResponse.length) {
+        clearInterval(typingInterval); // Detener la escritura una vez que termine
+        setOutput((prevOutput) => [
+          ...prevOutput,
+          <div key={prevOutput.length} className="command">{`> ${command}`}</div>,
+          <div key={prevOutput.length + 1} className="typing">{partialResponse + fullResponse.slice(0, index)}</div>
+        ]);
+      }
+    }, 150); // Cambiar este valor a 150ms entre cada letra escrita (puedes ajustarlo para hacerlo más lento)
+  };
+
+  // Manejador de envío de comando
+  const handleSendCommand = () => {
+    if (input.trim()) {
+      sendCommandToOllama(input);
+      setInput(""); // Limpiar la caja de texto
+    }
+  };
+
+  const handleLogin = (token) => {
+    setToken(token);
+    setIsLoggedIn(true);
   };
 
   return (
     <div className="App">
-      <div className="terminal">
-        <pre>{output}</pre>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            value={command}
-            onChange={(e) => setCommand(e.target.value)}
-            placeholder="Type a command..."
-            disabled={loading}
-          />
-          <button type="submit" disabled={loading}>Send</button>
-        </form>
-      </div>
+      {!isLoggedIn ? (
+        <div>Please log in first.</div>
+      ) : (
+        <div className="terminal">
+          <div className="output">
+            {output.map((line, index) => (
+              <div key={index}>{line}</div>
+            ))}
+            {loading && <div className="loading">Loading...</div>}
+          </div>
+          <div className="input-container">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSendCommand()}
+              placeholder="Type your command here..."
+            />
+            <button onClick={handleSendCommand}>Send</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

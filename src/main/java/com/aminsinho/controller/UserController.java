@@ -13,6 +13,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         userService.saveUser(user);
