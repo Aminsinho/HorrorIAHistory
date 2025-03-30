@@ -45,6 +45,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     .parseClaimsJws(jwt)
                     .getBody();
             username = claims.getSubject();
+            request.setAttribute("userId", claims.get("userId", String.class)); // Extraer y establecer userId
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

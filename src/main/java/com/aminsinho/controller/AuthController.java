@@ -35,10 +35,13 @@ public class AuthController {
         );
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        User authenticatedUser = userService.findByUsername(userDetails.getUsername());
+
         String token = Jwts.builder()
                 .setSubject(userDetails.getUsername())
+                .claim("userId", authenticatedUser.getId().toString()) // Incluir userId en el token
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 day
+                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 día
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
                 .compact();
 

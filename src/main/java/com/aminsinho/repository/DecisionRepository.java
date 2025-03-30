@@ -1,15 +1,12 @@
 package com.aminsinho.repository;
 
-import com.aminsinho.models.GameSession;
+import com.aminsinho.models.Decision;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface GameRepository extends JpaRepository<GameSession, UUID> {
-    List<GameSession> findByUserId(UUID userId);
+public interface DecisionRepository extends JpaRepository<Decision, Long> {
+    List<Decision> findBySessionIdOrderByIdDesc(UUID sessionId);
 }
-

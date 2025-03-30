@@ -1,37 +1,30 @@
-// src/pages/RegisterPage.js
-
 import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-function RegisterPage() {
+const RegisterPage = () => {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const navigate = useNavigate(); // Para redirigir después del registro
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const user = { username, password };
-
     try {
-      // Hacer la petición a tu endpoint de registro
-      const response = await fetch("http://localhost:8080/users/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(user),
+      const response = await axios.post("http://localhost:8080/users/register", {
+        username,
+        email,
+        password,
       });
 
-      if (response.ok) {
-        // Mostrar mensaje de éxito
+      if (response.status === 200) {
         setMessage("User registered successfully");
-      } else {
-        const errorData = await response.json();
-        setMessage(errorData.message || "Error during registration");
+        setTimeout(() => navigate("/login"), 2000); // Redirigir al login después de 2s
       }
     } catch (error) {
-      // Manejo de errores de la petición
-      setMessage("Error: " + error.message);
+      setMessage("Error during registration: " + error.response?.data || "Unknown error");
     }
   };
 
@@ -39,6 +32,15 @@ function RegisterPage() {
     <div>
       <h1>Register</h1>
       <form onSubmit={handleSubmit}>
+        <div>
+          <label>Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
         <div>
           <label>Username</label>
           <input
@@ -60,8 +62,9 @@ function RegisterPage() {
         <button type="submit">Register</button>
       </form>
       {message && <p>{message}</p>}
+      <p>Already have an account? <a href="/login">Login here</a></p>
     </div>
   );
-}
+};
 
 export default RegisterPage;

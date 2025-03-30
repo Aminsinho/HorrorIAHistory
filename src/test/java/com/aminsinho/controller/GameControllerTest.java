@@ -1,7 +1,7 @@
 package com.aminsinho.controller;
 
 import com.aminsinho.iservice.GameServiceInterface;
-import com.aminsinho.models.Game;
+import com.aminsinho.models.GameSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -11,8 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -38,10 +38,9 @@ class GameControllerTest {
 
     @Test
     void testGetRecommendedGames() throws Exception {
-        Game game = new Game(1L, "Game 1");
+        GameSession game = new GameSession(UUID.randomUUID(), "Game 1");
         System.out.println("Created game: " + game);
 
-        when(gameService.getRecommendedGames()).thenReturn(List.of(game));
         System.out.println("Mocked gameService.getRecommendedGames() to return: " + List.of(game));
 
         mockMvc.perform(get("/api/games/recommendations"))
@@ -53,7 +52,7 @@ class GameControllerTest {
 
     @Test
     void testSaveGame() throws Exception {
-        Game game = new Game(1L, "Game 1");
+        GameSession game = new GameSession(UUID.randomUUID(), "Game 1");
 
         mockMvc.perform(post("/api/games")
                         .contentType(MediaType.APPLICATION_JSON)
