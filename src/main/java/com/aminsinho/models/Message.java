@@ -18,7 +18,7 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(length = 1500) // Aumentar la longitud a 1500 caracteres
+    @Column(length = 15000) // Aumentar la longitud a 1500 caracteres
     private String message;
 
     @Column(name = "timestamp")

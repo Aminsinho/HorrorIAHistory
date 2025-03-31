@@ -44,16 +44,15 @@ public class GameService implements GameServiceInterface {
     }
 
 
-    @Transactional
-    public Message sendMessage(UUID userId, Message message) {
+    public void sendMessage(UUID userId, Message message) {
         User user = getGameSession(userId).getUser();
         message.setUser(user);
         String responseText = callOllama(message.getMessage());
+        messageRepository.save(message);
         Response responseMessage = new Response();
         responseMessage.setResponse(responseText);
         responseMessage.setUser(user);
         responseRepository.save(responseMessage);
-        return messageRepository.save(message);
     }
 
     public List<Message> getMessages(UUID userId) {

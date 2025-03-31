@@ -31,7 +31,8 @@ public class GameController {
     @PostMapping("/message")
     public ResponseEntity<Message> sendMessage(HttpServletRequest request, @RequestBody Message message) {
         UUID userId = UUID.fromString((String) request.getAttribute("userId"));
-        return ResponseEntity.ok(gameService.sendMessage(userId, message));
+        gameService.sendMessage(userId, message);
+        return ResponseEntity.ok(message);
     }
 
     @CrossOrigin(origins = "http://localhost:3000")

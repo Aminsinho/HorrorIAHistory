@@ -12,7 +12,7 @@ public interface GameServiceInterface {
 
     GameSession startGame(UUID userId);
     
-    Message sendMessage(UUID userId, Message message);
+    void sendMessage(UUID userId, Message message);
 
     List<Message> getMessages(UUID userId);
 

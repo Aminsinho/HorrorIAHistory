@@ -61,12 +61,12 @@ const Game = ({ userId }) => {
       const responses = await responsesResponse.json();
 
       const combinedMessages = [
-        ...messages.map(msg => ({ text: escapeText(msg.message), sender: "Tú", timestamp: msg.timestamp })),
-        ...responses.map(res => ({ text: escapeText(res.response), sender: "IA", timestamp: res.timestamp }))
+        ...messages.map(msg => ({ text: escapeText(msg.message), sender: "Tú", timestamp: new Date(msg.timestamp) })),
+        ...responses.map(res => ({ text: escapeText(res.response), sender: "IA", timestamp: new Date(res.timestamp) }))
       ];
 
       // Ordenar los mensajes por timestamp
-      combinedMessages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      combinedMessages.sort((a, b) => a.timestamp - b.timestamp);
 
       setMessages(combinedMessages);
     } catch (error) {
