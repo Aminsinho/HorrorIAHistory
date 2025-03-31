@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./Game.css";
 import clickSound from "./sounds/click.wav";
 import errorSound from "./sounds/click.wav";
@@ -10,11 +10,17 @@ const Game = ({ userId }) => {
   const [input, setInput] = useState("");
   const [decisions, setDecisions] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     startGame();
     fetchMessagesAndResponses();
   }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const playSound = (sound) => {
     new Audio(sound).play();
@@ -61,11 +67,10 @@ const Game = ({ userId }) => {
       const responses = await responsesResponse.json();
 
       const combinedMessages = [
-        ...messages.map(msg => ({ text: escapeText(msg.message), sender: "Tú", timestamp: new Date(msg.timestamp) })),
-        ...responses.map(res => ({ text: escapeText(res.response), sender: "IA", timestamp: new Date(res.timestamp) }))
+        ...messages.map(msg => ({ id: "message", text: escapeText(msg.message), sender: "Tú", timestamp: new Date(msg.timestamp) })),
+        ...responses.map(res => ({ id: "response", text: escapeText(res.response), sender: "IA", timestamp: new Date(res.timestamp) }))
       ];
 
-      // Ordenar los mensajes por timestamp
       combinedMessages.sort((a, b) => a.timestamp - b.timestamp);
 
       setMessages(combinedMessages);
@@ -121,6 +126,9 @@ const Game = ({ userId }) => {
     if (input.trim() === "") return;
     playSound(clickSound);
     setLoading(true);
+    setMessages(prevMessages => [...prevMessages, { text: escapeText(input), sender: "Tú", timestamp: new Date().toISOString(), isTemporary: true }]);
+    setInput("");
+    setIsTyping(true);
     try {
       const response = await fetch("http://localhost:8080/game/message", {
         method: "POST",
@@ -133,14 +141,14 @@ const Game = ({ userId }) => {
       const data = await response.json();
       simulateTyping(data.story);
       setDecisions(data.decisions || []);
-      setMessages(prevMessages => [...prevMessages, { text: escapeText(input), sender: "Tú", timestamp: new Date().toISOString() }]);
-      setInput("");
-      fetchMessagesAndResponses(); // Actualizar los mensajes después de enviar uno nuevo
+      fetchMessagesAndResponses();
+      scrollToBottom();
     } catch (error) {
       playSound(errorSound);
       console.error("Error sending message:", error);
     }
     setLoading(false);
+    setIsTyping(false);
   };
 
   const handleKeyPress = (event) => {
@@ -157,11 +165,15 @@ const Game = ({ userId }) => {
 
     setStory("");
     let index = 0;
+    setIsTyping(true);
     const interval = setInterval(() => {
       setStory((prev) => prev + text[index]);
       playSound(typeSound);
       index++;
-      if (index === text.length) clearInterval(interval);
+      if (index === text.length) {
+        clearInterval(interval);
+        setIsTyping(false);
+      }
     }, 500);
   };
 
@@ -172,15 +184,22 @@ const Game = ({ userId }) => {
       .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
   };
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <div className="game-container">
       <div className="story-box">
         {messages.map((msg, index) => (
-          <div key={index} className={`message ${msg.sender === "Tú" ? "user-message" : "ia-message"}`}>
+          <div key={index} className={`message ${msg.sender === "Tú" ? "user-message" : "ia-message"} ${msg.isTemporary ? "temporary" : ""} ${msg.id}`}>
             <p className="sender">{msg.sender}</p>
             <p className="text" dangerouslySetInnerHTML={{ __html: msg.text }}></p>
+            {msg.id === "response" && <hr className="response-separator" />}
           </div>
         ))}
+        {isTyping && <div className="typing-indicator">Escribiendo...</div>}
+        <div ref={messagesEndRef} />
       </div>
       <div className="options">
         {decisions.map((decision, index) => (
@@ -203,3 +222,4 @@ const Game = ({ userId }) => {
 };
 
 export default Game;
+
