@@ -18,6 +18,7 @@ public class Response {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(length = 1500) // Aumentar la longitud a 1500 caracteres
     private String response;
 
     @Column(name = "timestamp")

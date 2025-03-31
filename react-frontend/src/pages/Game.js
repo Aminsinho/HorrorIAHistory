@@ -9,10 +9,11 @@ const Game = ({ userId }) => {
   const [loading, setLoading] = useState(false);
   const [input, setInput] = useState("");
   const [decisions, setDecisions] = useState([]);
+  const [messages, setMessages] = useState([]);
 
   useEffect(() => {
     startGame();
-    fetchMessages();
+    fetchMessagesAndResponses();
   }, []);
 
   const playSound = (sound) => {
@@ -39,19 +40,37 @@ const Game = ({ userId }) => {
     setLoading(false);
   };
 
-  const fetchMessages = async () => {
+  const fetchMessagesAndResponses = async () => {
     try {
-      const response = await fetch("http://localhost:8080/game/messages", {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`
-        }
-      });
-      const messages = await response.json();
-      const combinedMessages = messages.map(msg => msg.message).join("\n");
-      setStory(combinedMessages);
+      const [messagesResponse, responsesResponse] = await Promise.all([
+        fetch("http://localhost:8080/game/messages", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`
+          }
+        }),
+        fetch("http://localhost:8080/game/responses", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`
+          }
+        })
+      ]);
+
+      const messages = await messagesResponse.json();
+      const responses = await responsesResponse.json();
+
+      const combinedMessages = [
+        ...messages.map(msg => ({ text: escapeText(msg.message), sender: "Tú", timestamp: msg.timestamp })),
+        ...responses.map(res => ({ text: escapeText(res.response), sender: "IA", timestamp: res.timestamp }))
+      ];
+
+      // Ordenar los mensajes por timestamp
+      combinedMessages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+      setMessages(combinedMessages);
     } catch (error) {
-      console.error("Error fetching messages:", error);
+      console.error("Error fetching messages and responses:", error);
     }
   };
 
@@ -114,8 +133,9 @@ const Game = ({ userId }) => {
       const data = await response.json();
       simulateTyping(data.story);
       setDecisions(data.decisions || []);
+      setMessages(prevMessages => [...prevMessages, { text: escapeText(input), sender: "Tú", timestamp: new Date().toISOString() }]);
       setInput("");
-      fetchMessages(); // Actualizar los mensajes después de enviar uno nuevo
+      fetchMessagesAndResponses(); // Actualizar los mensajes después de enviar uno nuevo
     } catch (error) {
       playSound(errorSound);
       console.error("Error sending message:", error);
@@ -145,10 +165,22 @@ const Game = ({ userId }) => {
     }, 500);
   };
 
+  const escapeText = (text) => {
+    return text
+      .replace(/\\n/g, "<br>")
+      .replace(/\\/g, "\\\\")
+      .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
+  };
+
   return (
     <div className="game-container">
       <div className="story-box">
-        <p className="typing-text">{story}<span className="cursor">|</span></p>
+        {messages.map((msg, index) => (
+          <div key={index} className={`message ${msg.sender === "Tú" ? "user-message" : "ia-message"}`}>
+            <p className="sender">{msg.sender}</p>
+            <p className="text" dangerouslySetInnerHTML={{ __html: msg.text }}></p>
+          </div>
+        ))}
       </div>
       <div className="options">
         {decisions.map((decision, index) => (

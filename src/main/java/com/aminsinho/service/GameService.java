@@ -3,6 +3,7 @@ package com.aminsinho.service;
 import com.aminsinho.iservice.GameServiceInterface;
 import com.aminsinho.models.*;
 import com.aminsinho.repository.*;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +20,6 @@ public class GameService implements GameServiceInterface {
     private final GameRepository gameSessionRepository;
     private final MessageRepository messageRepository;
     private final ResponseRepository responseRepository;
-    private final DecisionRepository decisionRepository;
     private final UserRepository userRepository;
 
     public GameSession startGame(UUID userId) {
@@ -30,15 +30,7 @@ public class GameService implements GameServiceInterface {
         return gameSessionRepository.save(session);
     }
 
-    public GameSession makeDecision(UUID userId, String decision) {
-        GameSession session = getGameSession(userId);
 
-        Decision lastDecision = new Decision(null, session, decision, session.getCurrentState());
-        decisionRepository.save(lastDecision);
-
-        session.setCurrentState("Nuevo estado tras decisión: " + decision);
-        return gameSessionRepository.save(session);
-    }
 
     private GameSession getGameSession(UUID userId) {
         List<GameSession> sessions = gameSessionRepository.findByUserId(userId);
@@ -51,20 +43,8 @@ public class GameService implements GameServiceInterface {
         return session;
     }
 
-    public GameSession rollback(UUID userId) {
-        GameSession session = getGameSession(userId);
 
-        List<Decision> decisions = decisionRepository.findBySessionIdOrderByIdDesc(session.getId());
-
-        if (!decisions.isEmpty()) {
-            Decision lastDecision = decisions.get(0);
-            session.setCurrentState(lastDecision.getPreviousState());
-            gameSessionRepository.save(session);
-            decisionRepository.delete(lastDecision);
-        }
-        return session;
-    }
-
+    @Transactional
     public Message sendMessage(UUID userId, Message message) {
         User user = getGameSession(userId).getUser();
         message.setUser(user);

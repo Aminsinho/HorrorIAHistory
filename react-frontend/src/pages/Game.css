@@ -1,126 +1,56 @@
-/* Estilos básicos para el juego */
-
+/* Game.css */
 .game-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   height: 100vh;
-  background-color: #000; /* Fondo negro */
-  font-family: "Courier New", Courier, monospace; /* Fuente de terminal */
-  color: #00ff00; /* Texto verde fluorescente */
 }
 
 .story-box {
-  background-color: #000; /* Fondo negro */
-  border: 1px solid #00ff00; /* Borde verde fluorescente */
+  flex: 1;
+  overflow-y: scroll;
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+}
+
+.message {
+  margin: 5px 0;
+  padding: 10px;
   border-radius: 5px;
-  padding: 20px;
-  max-width: 600px;
-  width: 100%;
-  box-shadow: 0 4px 10px rgba(0, 255, 0, 0.1); /* Sombra verde */
-  margin-bottom: 20px;
+  max-width: 70%;
 }
 
-.typing-text {
-  font-size: 1.2rem;
-  color: #00ff00; /* Texto verde fluorescente */
-  white-space: pre-wrap;
-  word-wrap: break-word;
+.user-message {
+  background-color: #ff073a; /* Rojo neón */
+  color: white;
+  align-self: flex-end;
+  border: 2px solid #ff073a;
 }
 
-.cursor {
-  animation: blink 0.7s infinite;
-  border-right: 2px solid #00ff00; /* Cursor verde fluorescente */
-}
-
-@keyframes blink {
-  0% {
-    border-right: 2px solid transparent;
-  }
-  50% {
-    border-right: 2px solid #00ff00;
-  }
-  100% {
-    border-right: 2px solid transparent;
-  }
+.ia-message {
+  background-color: #39ff14; /* Verde neón */
+  color: black;
+  align-self: flex-start;
+  border: 2px solid #39ff14;
 }
 
 .options {
   display: flex;
   flex-direction: column;
-  align-items: center;
-}
-
-button {
-  background-color: #000; /* Fondo negro */
-  color: #00ff00; /* Texto verde fluorescente */
-  border: 1px solid #00ff00; /* Borde verde fluorescente */
-  padding: 10px 20px;
-  font-size: 1rem;
-  cursor: pointer;
-  margin: 5px;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
-}
-
-button:hover {
-  background-color: #333; /* Fondo gris oscuro al pasar el ratón */
-}
-
-.rollback {
-  background-color: #000; /* Fondo negro */
-  color: #ff0; /* Texto amarillo fluorescente */
-  border: 1px solid #ff0; /* Borde amarillo fluorescente */
-}
-
-.rollback:hover {
-  background-color: #333; /* Fondo gris oscuro al pasar el ratón */
-}
-
-button:focus {
-  outline: none;
-}
-
-.loading {
-  color: #00ff00; /* Texto verde fluorescente */
-  font-size: 1.2rem;
-  font-weight: bold;
-}
-
-.error {
-  color: red;
-  font-size: 1.2rem;
+  margin-bottom: 10px;
 }
 
 .chat-input {
   display: flex;
   align-items: center;
-  margin-top: 20px;
 }
 
 .chat-input input {
   flex: 1;
   padding: 10px;
-  font-size: 1rem;
-  border: 1px solid #00ff00; /* Borde verde fluorescente */
-  background-color: #000; /* Fondo negro */
-  color: #00ff00; /* Texto verde fluorescente */
-  border-radius: 5px;
   margin-right: 10px;
 }
 
 .chat-input button {
   padding: 10px 20px;
-  font-size: 1rem;
-  background-color: #000; /* Fondo negro */
-  color: #00ff00; /* Texto verde fluorescente */
-  border: 1px solid #00ff00; /* Borde verde fluorescente */
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.chat-input button:hover {
-  background-color: #333; /* Fondo gris oscuro al pasar el ratón */
 }

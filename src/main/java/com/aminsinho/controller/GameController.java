@@ -27,20 +27,6 @@ public class GameController {
         return ResponseEntity.ok(gameService.startGame(userId));
     }
 
-    @CrossOrigin(origins = "http://localhost:3000") // Cambia esto a la URL de tu frontend
-    @PostMapping("/decision")
-    public ResponseEntity<GameSession> makeDecision(HttpServletRequest request, @RequestParam String decision) {
-        UUID userId = UUID.fromString((String) request.getAttribute("userId"));
-        return ResponseEntity.ok(gameService.makeDecision(userId, decision));
-    }
-
-    @CrossOrigin(origins = "http://localhost:3000") // Cambia esto a la URL de tu frontend
-    @PostMapping("/rollback")
-    public ResponseEntity<GameSession> rollback(HttpServletRequest request) {
-        UUID userId = UUID.fromString((String) request.getAttribute("userId"));
-        return ResponseEntity.ok(gameService.rollback(userId));
-    }
-
     @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/message")
     public ResponseEntity<Message> sendMessage(HttpServletRequest request, @RequestBody Message message) {

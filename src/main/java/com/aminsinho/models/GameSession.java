@@ -18,6 +18,7 @@ public class GameSession {
     private UUID id;
 
 
+    @Column(length = 1500) // Aumentar la longitud a 1500 caracteres
     private String currentState;
 
     @ManyToOne
