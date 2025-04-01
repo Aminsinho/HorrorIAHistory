@@ -48,7 +48,10 @@ public class GameService implements GameServiceInterface {
                 Cada decisión puede llevarlo más cerca de la salida o de la muerte.
                 Si muere, explícale qué salió mal y qué opción habría sido mejor.
                 Usa descripciones inmersivas y genera una sensación de peligro constante.
-                Comienza la historia describiendo el entorno y pregunta: "¿Qué haces?" quiero que las escenas sean de de 20 palabras""");
+                Comienza la historia describiendo el entorno y pregunta: "¿Qué haces?" quiero que las escenas sean de de 20 palabras
+                No quiero que me des opciones, tengo que decirte yo lo que decido.
+                Ademas de esto tenemos que tener en cuenta proponer una salida logica a la historia, como un destino o una meta.
+                """);
 
         // Guardar la respuesta de la IA
         Response responseMessage = new Response();
@@ -114,8 +117,7 @@ public class GameService implements GameServiceInterface {
         if (historialBuilder.length() > 1) {
             historialBuilder.setLength(historialBuilder.length() - 1);
         }
-        historialBuilder.append("] ahora en base a nuestras decisiones y escenas tienes que seguir la historia. No quiero que me des opciones, tengo que decirte yo lo que decido. Las escenas tienen que poder describirse en 20 palabras." +
-                " " + message.getMessage());
+        historialBuilder.append("] ahora en base a nuestras decisiones y escenas tienes que seguir la historia. No quiero que me des opciones, tengo que decirte yo lo que decido. Las escenas tienen que poder describirse en 40 palabras. Si el jugador muere o llega al destino sin morir, debe ganar o perder respectivamente. quiero tambien que no pongas cosas tipo 'Entendido, continuemos con la historia. ' o 'Claro, sigamos con la historia.' o 'Entendido, continuemos con la historia.' o 'Claro, sigamos con la historia.' o 'Entendido, continuemos con la historia.' o 'Claro, sigamos con la historia.' o 'Entendido, continuemos con la historia.' o 'Claro, sigamos con la historia.' o 'Entendido, continuemos con la historia.' o 'Claro, sigamos con la historia.' o 'Entendido, continuemos con la historia.' o 'Claro, sigamos con la historia.' o 'Entendido, continuemos con la historia.' o 'Claro, sigamos con la historia.' directamente describe la escena. si el jugador muere se pone algo del estilo has terminado la historia, podrias haber hecho esto o lo otro par no morir, si el jugador gana se dice felicidades. ademas de esto tenemos que controlar donde esta nuestro perseguidor, tenemos que dar mas informacion al jugador. esta es la decision que ha elegido el jugador: Jugador dice: " + message.getMessage());
 
         // Crear la estructura final del JSON para la IA
         String jsonPayload = historialBuilder.toString();
