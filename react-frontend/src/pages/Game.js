@@ -1,3 +1,4 @@
+// react-frontend/src/pages/Game.js
 import React, { useState, useEffect, useRef } from "react";
 import "./Game.css";
 import clickSound from "./sounds/click.wav";
@@ -14,7 +15,6 @@ const Game = ({ userId }) => {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    startGame();
     fetchMessagesAndResponses();
   }, []);
 
@@ -24,26 +24,6 @@ const Game = ({ userId }) => {
 
   const playSound = (sound) => {
     new Audio(sound).play();
-  };
-
-  const startGame = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch("http://localhost:8080/game/start", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`
-        }
-      });
-      const data = await response.json();
-      simulateTyping(data.story);
-      setDecisions(data.decisions || []);
-    } catch (error) {
-      playSound(errorSound);
-      console.error("Error starting game:", error);
-    }
-    setLoading(false);
   };
 
   const fetchMessagesAndResponses = async () => {
@@ -222,4 +202,3 @@ const Game = ({ userId }) => {
 };
 
 export default Game;
-

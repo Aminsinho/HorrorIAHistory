@@ -32,24 +32,41 @@ public class GameService implements GameServiceInterface {
     private final ResponseRepository responseRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public GameSession startGame(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         GameSession session = new GameSession(null, "Estado inicial...", user);
+
+        // Llamar a la IA
+        String responseText = callOllama("""
+                Genera una historia interactiva en la que el jugador se despierta en una ciudad destruida sin recordar cómo llegó ahí.
+                No hay señales de vida, pero hay indicios de que alguien o algo lo está observando.
+                El jugador debe explorar, encontrar suministros y tomar decisiones para sobrevivir.
+                Hay amenazas como criaturas, trampas y estructuras inestables.
+                Cada decisión puede llevarlo más cerca de la salida o de la muerte.
+                Si muere, explícale qué salió mal y qué opción habría sido mejor.
+                Usa descripciones inmersivas y genera una sensación de peligro constante.
+                Comienza la historia describiendo el entorno y pregunta: "¿Qué haces?""");
+
+        // Guardar la respuesta de la IA
+        Response responseMessage = new Response();
+        responseMessage.setResponse(responseText);
+        responseMessage.setUser(user);
+        responseRepository.save(responseMessage);
         return gameSessionRepository.save(session);
     }
 
 
 
     private GameSession getGameSession(UUID userId) {
-        List<GameSession> sessions = gameSessionRepository.findByUserId(userId);
+        GameSession session = gameSessionRepository.findByUserId(userId);
 
-        if (sessions.isEmpty()) {
+        if (session == null) {
             throw new RuntimeException("Partida no encontrada");
         }
 
-        GameSession session = sessions.get(0);
         return session;
     }
 
@@ -78,15 +95,16 @@ public class GameService implements GameServiceInterface {
         // Construir historial en JSON
         StringBuilder historialBuilder = new StringBuilder();
 
-        historialBuilder.append("Aquí tienes nuestra conversación hasta ahora: [");
+        historialBuilder.append("Estamos jugando a un juego, en el que tu me describes un paisaje y yo a ti una decision en base a esa decision tu me respondes con una escena nueva, el objetivo es que yo me salve o que me muera dependiendo de las decisiones que yo tome." +
+                "de momento estas son nuestras escenas y decisiones: [");
 
         for (Object obj : combinedList) {
             if (obj instanceof Message) {
-                historialBuilder.append("{'Turno':'Yo','Mensaje':'")
+                historialBuilder.append("{'Turno':'Yo','Decision':'")
                         .append(((Message) obj).getMessage().replace("'", "\\'"))
                         .append("'},");
             } else if (obj instanceof Response) {
-                historialBuilder.append("{'Turno':'Tú','Mensaje':'")
+                historialBuilder.append("{'Turno':'Tú','Escena':'")
                         .append(((Response) obj).getResponse().replace("'", "\\'"))
                         .append("'},");
             }
@@ -96,7 +114,8 @@ public class GameService implements GameServiceInterface {
         if (historialBuilder.length() > 1) {
             historialBuilder.setLength(historialBuilder.length() - 1);
         }
-        historialBuilder.append("] quiero que tengas en cuenta el historial de la conversacion para responderme a lo que te voy a decir a continuación: " + message.getMessage());
+        historialBuilder.append("] ahora en base a nuestras decisiones y escenas tienes que seguir la historia." +
+                " " + message.getMessage());
 
         // Crear la estructura final del JSON para la IA
         String jsonPayload = historialBuilder.toString();

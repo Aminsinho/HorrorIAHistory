@@ -22,4 +22,8 @@ public class User {
     private String username;
 
     private String password;
+
+    @OneToOne
+    @JoinColumn(name = "game_session_id", nullable = true)
+    private GameSession gameSession;
 }

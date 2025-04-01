@@ -21,9 +21,10 @@ public class GameSession {
     @Column(length = 15000) // Aumentar la longitud a 1500 caracteres
     private String currentState;
 
-    @ManyToOne
-    private User user;
 
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     public GameSession(UUID id, String currentState) {
         this.id = id;
