@@ -48,7 +48,7 @@ public class GameService implements GameServiceInterface {
                 Cada decisión puede llevarlo más cerca de la salida o de la muerte.
                 Si muere, explícale qué salió mal y qué opción habría sido mejor.
                 Usa descripciones inmersivas y genera una sensación de peligro constante.
-                Comienza la historia describiendo el entorno y pregunta: "¿Qué haces?""");
+                Comienza la historia describiendo el entorno y pregunta: "¿Qué haces?" quiero que las escenas sean de de 20 palabras""");
 
         // Guardar la respuesta de la IA
         Response responseMessage = new Response();
@@ -95,7 +95,7 @@ public class GameService implements GameServiceInterface {
         // Construir historial en JSON
         StringBuilder historialBuilder = new StringBuilder();
 
-        historialBuilder.append("Estamos jugando a un juego, en el que tu me describes un paisaje y yo a ti una decision en base a esa decision tu me respondes con una escena nueva, el objetivo es que yo me salve o que me muera dependiendo de las decisiones que yo tome." +
+        historialBuilder.append("Estamos jugando a un juego, en el que tu me describes un paisaje y yo a ti una decision en base a esa decision tu me respondes con una escena nueva, el objetivo es que yo me salve o que me muera dependiendo de las decisiones que yo tome. No quiero que me des opciones, tengo que decirte yo lo que decido." +
                 "de momento estas son nuestras escenas y decisiones: [");
 
         for (Object obj : combinedList) {
@@ -114,7 +114,7 @@ public class GameService implements GameServiceInterface {
         if (historialBuilder.length() > 1) {
             historialBuilder.setLength(historialBuilder.length() - 1);
         }
-        historialBuilder.append("] ahora en base a nuestras decisiones y escenas tienes que seguir la historia." +
+        historialBuilder.append("] ahora en base a nuestras decisiones y escenas tienes que seguir la historia. No quiero que me des opciones, tengo que decirte yo lo que decido. Las escenas tienen que poder describirse en 20 palabras." +
                 " " + message.getMessage());
 
         // Crear la estructura final del JSON para la IA
