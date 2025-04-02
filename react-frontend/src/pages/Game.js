@@ -59,48 +59,6 @@ const Game = ({ userId }) => {
     }
   };
 
-  const makeDecision = async (decision) => {
-    playSound(clickSound);
-    setLoading(true);
-    try {
-      const response = await fetch("http://localhost:8080/game/decision", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`
-        },
-        body: JSON.stringify({ decision })
-      });
-      const data = await response.json();
-      simulateTyping(data.story);
-      setDecisions(data.decisions || []);
-    } catch (error) {
-      playSound(errorSound);
-      console.error("Error making decision:", error);
-    }
-    setLoading(false);
-  };
-
-  const rollback = async () => {
-    playSound(clickSound);
-    setLoading(true);
-    try {
-      const response = await fetch("http://localhost:8080/game/rollback", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`
-        }
-      });
-      const data = await response.json();
-      simulateTyping(data.story);
-      setDecisions(data.decisions || []);
-    } catch (error) {
-      playSound(errorSound);
-      console.error("Error rolling back:", error);
-    }
-    setLoading(false);
-  };
 
   const sendMessage = async () => {
     if (input.trim() === "") return;
@@ -180,12 +138,6 @@ const Game = ({ userId }) => {
         ))}
         {isTyping && <div className="typing-indicator">Escribiendo...</div>}
         <div ref={messagesEndRef} />
-      </div>
-      <div className="options">
-        {decisions.map((decision, index) => (
-          <button key={index} onClick={() => makeDecision(decision)}>{decision}</button>
-        ))}
-        <button onClick={rollback} className="rollback">⏪ Rollback</button>
       </div>
       <div className="chat-input">
         <input

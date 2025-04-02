@@ -4,8 +4,6 @@ import com.aminsinho.iservice.GameServiceInterface;
 import com.aminsinho.models.*;
 import com.aminsinho.repository.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
@@ -17,8 +15,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -39,7 +35,6 @@ public class GameService implements GameServiceInterface {
 
         GameSession session = new GameSession(null, "Estado inicial...", user);
 
-        // Llamar a la IA
         String responseText = callOllama("""
                 Genera una historia interactiva en la que el jugador se despierta en una ciudad destruida sin recordar cómo llegó ahí.
                 No hay señales de vida, pero hay indicios de que alguien o algo lo está observando.
@@ -53,7 +48,6 @@ public class GameService implements GameServiceInterface {
                 Ademas de esto tenemos que tener en cuenta proponer una salida logica a la historia, como un destino o una meta.
                 """);
 
-        // Guardar la respuesta de la IA
         Response responseMessage = new Response();
         responseMessage.setResponse(responseText);
         responseMessage.setUser(user);
@@ -98,8 +92,14 @@ public class GameService implements GameServiceInterface {
         // Construir historial en JSON
         StringBuilder historialBuilder = new StringBuilder();
 
-        historialBuilder.append("Estamos jugando a un juego, en el que tu me describes un paisaje y yo a ti una decision en base a esa decision tu me respondes con una escena nueva, el objetivo es que yo me salve o que me muera dependiendo de las decisiones que yo tome. No quiero que me des opciones, tengo que decirte yo lo que decido." +
-                "de momento estas son nuestras escenas y decisiones: [");
+        historialBuilder.append("""
+                Estamos jugando a un juego, en el que tu me describes un paisaje y\s
+                yo a ti una decision en base a esa decision tu me respondes con\s
+                una escena nueva, el objetivo es que yo me salve o que me\s
+                muera dependiendo de las decisiones que yo tome. No quiero\s
+                que me des opciones, tengo que decirte yo lo que decido." +
+                "de momento estas son nuestras escenas y decisiones: [
+               \s""");
 
         for (Object obj : combinedList) {
             if (obj instanceof Message) {
@@ -117,14 +117,30 @@ public class GameService implements GameServiceInterface {
         if (historialBuilder.length() > 1) {
             historialBuilder.setLength(historialBuilder.length() - 1);
         }
-        historialBuilder.append("] ahora en base a nuestras decisiones y escenas tienes que seguir la historia. No quiero que me des opciones, tengo que decirte yo lo que decido. Las escenas tienen que poder describirse en 40 palabras. Si el jugador muere o llega al destino sin morir, debe ganar o perder respectivamente. quiero tambien que no pongas cosas tipo 'Entendido, continuemos con la historia. ' o 'Claro, sigamos con la historia.' o 'Entendido, continuemos con la historia.' o 'Claro, sigamos con la historia.' o 'Entendido, continuemos con la historia.' o 'Claro, sigamos con la historia.' o 'Entendido, continuemos con la historia.' o 'Claro, sigamos con la historia.' o 'Entendido, continuemos con la historia.' o 'Claro, sigamos con la historia.' o 'Entendido, continuemos con la historia.' o 'Claro, sigamos con la historia.' o 'Entendido, continuemos con la historia.' o 'Claro, sigamos con la historia.' directamente describe la escena. si el jugador muere se pone algo del estilo has terminado la historia, podrias haber hecho esto o lo otro par no morir, si el jugador gana se dice felicidades. ademas de esto tenemos que controlar donde esta nuestro perseguidor, tenemos que dar mas informacion al jugador. esta es la decision que ha elegido el jugador: Jugador dice: " + message.getMessage());
 
-        // Crear la estructura final del JSON para la IA
+        String ultimaPartePrompt = """
+                ] ahora en base a nuestras decisiones y escenas tienes que seguir la historia.\s
+                No quiero que me des opciones, tengo que decirte yo lo que decido.\s
+                Las escenas tienen que poder describirse en 40 palabras.\s
+                Si el jugador muere o llega al destino sin morir, debe ganar o perder respectivamente.\s
+                quiero tambien que no pongas cosas tipo 'Entendido, continuemos con la historia.\s
+                ' o 'Claro, sigamos con la historia.' o 'Entendido, continuemos con la historia.'\s
+                o 'Claro, sigamos con la historia.' o 'Entendido, continuemos con la historia.'\s
+                o 'Claro, sigamos con la historia.' o 'Entendido, continuemos con la historia.'\s
+                o 'Claro, sigamos con la historia.' o 'Entendido, continuemos con la historia.'\s
+                o 'Claro, sigamos con la historia.' o 'Entendido, continuemos con la historia.'\s
+                o 'Claro, sigamos con la historia.' o 'Entendido, continuemos con la historia.'\s
+                o 'Claro, sigamos con la historia.' directamente describe la escena.\s
+                si el jugador muere se pone algo del estilo has terminado la historia,\s
+                podrias haber hecho esto o lo otro par no morir, si el jugador gana\s
+                se dice felicidades. ademas de esto tenemos que controlar donde esta\s
+                nuestro perseguidor, tenemos que dar mas informacion al jugador.\s
+                esta es la decision que ha elegido el jugador: Jugador dice:\s
+              \s""";
+        historialBuilder.append(ultimaPartePrompt).append(message.getMessage());
         String jsonPayload = historialBuilder.toString();
 
-        System.out.println("Mensaje enviado a la IA: " + jsonPayload);
 
-        // Llamar a la IA
         String responseText = callOllama(jsonPayload);
 
         // Guardar el mensaje del usuario
@@ -157,25 +173,18 @@ public class GameService implements GameServiceInterface {
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setDoOutput(true);
 
-            // Crear JSON de manera segura usando Jackson
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonInputString = objectMapper.writeValueAsString(new OllamaRequest("llama3.2", message));
 
-            System.out.println("JSON enviado: " + jsonInputString);
-
-            // Enviar JSON al servidor
             try (OutputStream os = conn.getOutputStream()) {
                 byte[] input = jsonInputString.getBytes(StandardCharsets.UTF_8);
                 os.write(input, 0, input.length);
             }
 
-            // Leer la respuesta del servidor
             int status = conn.getResponseCode();
             if (status != HttpURLConnection.HTTP_OK) {
                 throw new RuntimeException("Error al llamar a Ollama API: Código " + status);
             }
-
-            // Convertir respuesta a String
             StringBuilder responseBuilder = new StringBuilder();
             try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
                 String responseLine;
@@ -184,9 +193,7 @@ public class GameService implements GameServiceInterface {
                     responseBuilder.append(jsonResponse.optString("response", ""));
                 }
             }
-
             return responseBuilder.toString();
-
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Error al llamar a Ollama API", e);
