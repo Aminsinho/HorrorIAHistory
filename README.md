@@ -7,6 +7,10 @@ To start the application using Docker and Ollama Llama 3.2, follow these steps:
 3. **Start the application**: Use Docker Compose to start the application and its dependencies by running `docker-compose up`.
 4. **Access the application**: The application will be available at `http://localhost:8080`.
 
+### Project Description
+
+This project is a psychological horror game where players must make decisions to escape from a hypothetical location. The game challenges players with moral dilemmas and unpredictable scenarios, creating an immersive and suspenseful experience.
+
 ### Project Features
 
 This project is a Spring Boot application that uses Gradle for build automation. It includes the following components:
@@ -17,7 +21,7 @@ This project is a Spring Boot application that uses Gradle for build automation.
 - **PostgreSQL**: A relational database used to store application data.
 - **Docker**: Used to containerize the application and its dependencies.
 - **Docker Compose**: A tool for defining and running multi-container Docker applications.
-- **Ollama Llama 3.2**: A local AI model used for advanced functionalities.
+- **Ollama Llama 3.2**: A local AI model used for advanced functionalities, such as generating dynamic game scenarios and dialogues.
 
 ### Changing Database Creation Mode
 
