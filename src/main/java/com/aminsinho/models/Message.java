@@ -32,4 +32,8 @@ public class Message {
     protected void onCreate() {
         timestamp = new Timestamp(System.currentTimeMillis());
     }
+
+    public Message(String message) {
+        this.message = message;
+    }
 }

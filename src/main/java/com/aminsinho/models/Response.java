@@ -28,8 +28,18 @@ public class Response {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    public Response(String response, Timestamp timestamp, User user) {
+        this.response = response;
+        this.timestamp = timestamp;
+        this.user = user;
+    }
+
     @PrePersist
     protected void onCreate() {
         timestamp = new Timestamp(System.currentTimeMillis());
+    }
+
+    public Response(String response) {
+        this.response = response;
     }
 }
