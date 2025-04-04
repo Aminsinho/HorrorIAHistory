@@ -1,4 +1,4 @@
-package com.aminsinho.config;
+package com.aminsinho.auth.config;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

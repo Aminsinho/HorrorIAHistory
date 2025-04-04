@@ -1,4 +1,4 @@
-package com.aminsinho.controller;
+package com.aminsinho.auth.controller;
 
 import com.aminsinho.models.User;
 import com.aminsinho.service.UserService;

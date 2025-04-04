@@ -39,15 +39,13 @@ class GameServiceTest {
     @InjectMocks
     private GameService gameService;
 
+    @Mock
+    private OllamaService ollamaService;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        gameService = new GameService(gameRepository, messageRepository, responseRepository, userRepository) {
-            @Override
-            public String callOllama(String message) {
-                return "Mocked response from Ollama";
-            }
-        };
+        gameService = new GameService(gameRepository, messageRepository, responseRepository, userRepository, ollamaService);
     }
 
     @Test
@@ -70,18 +68,21 @@ class GameServiceTest {
     void testSendMessage() {
         UUID userId = UUID.randomUUID();
         User user = new User(userId, "test@example.com", "testuser", "password", null);
-        Message message = new Message("Hello, game!");
-        message.setTimestamp(new Timestamp(System.currentTimeMillis()));
+        GameSession gameSession = new GameSession(UUID.randomUUID(), "Estado inicial...", user);
+        Message message = new Message("Hola");
 
-        when(gameRepository.findByUserId(userId)).thenReturn(new GameSession(userId, "Estado inicial...", user));
-        when(messageRepository.findByUserId(userId)).thenReturn(List.of(message));
-        when(responseRepository.findByUserId(userId)).thenReturn(List.of(new Response("Response 1", new Timestamp(System.currentTimeMillis()), user)));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(gameRepository.findByUserId(userId)).thenReturn(gameSession);
+        when(messageRepository.findByUserId(userId)).thenReturn(List.of());
+
+        doNothing().when(ollamaService).callOllama(anyString(), eq(user));
 
         gameService.sendMessage(userId, message);
 
         verify(messageRepository, times(1)).save(message);
-        verify(responseRepository, times(1)).save(any(Response.class));
+        verify(ollamaService, times(1)).callOllama(anyString(), eq(user));
     }
+
 
     @Test
     void testGetMessages() {

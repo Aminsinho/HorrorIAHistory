@@ -23,7 +23,17 @@ public class User {
 
     private String password;
 
+    @Version
+    private Long version;
+
     @OneToOne
     @JoinColumn(name = "game_session_id", nullable = true)
     private GameSession gameSession;
+
+    public User(UUID userId, String mail, String testuser, String password, Object o) {
+        this.id = userId;
+        this.email = mail;
+        this.username = testuser;
+        this.password = password;
+    }
 }
